@@ -21,6 +21,10 @@ from bs4 import BeautifulSoup
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from requests import Request, Session
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import random
 from threading import Lock
@@ -43,21 +47,21 @@ async def parse(bot: Bot):
     time.sleep(10)
 
     try:
-    driver.implicitly_wait(10)  # Чекаємо, коли елементи з'являться на сторінці
-    # Шукаємо другий div елемент з класом 'chakra-skeleton css-mkh3pz', що містить Fee MNT
-    fee_elements = driver.find_elements(By.CSS_SELECTOR, ".css-5ujltp .chakra-skeleton.css-mkh3pz")
-    if len(fee_elements) > 1:
-        fee_text = fee_elements[1].text.strip()  # Витягуємо текст з другого div елемента
-        fee_parts = fee_text.split(' ')
-        if len(fee_parts) > 0:
-            fee_amount = fee_parts[0][:4]  # Отримуємо перші 4 цифри з суми комісії
-        else:
-            fee_amount = "0"  # Якщо не вдалося отримати текст, повертаємо "0" (або інше значення за замовчуванням)
-    print(fee_amount)
-except Exception as e:
-    print(e)
-finally:
-    driver.quit()
+        driver.implicitly_wait(10)  # Чекаємо, коли елементи з'являться на сторінці
+        # Шукаємо другий div елемент з класом 'chakra-skeleton css-mkh3pz', що містить Fee MNT
+        fee_elements = driver.find_elements(By.CSS_SELECTOR, ".css-5ujltp .chakra-skeleton.css-mkh3pz")
+        if len(fee_elements) > 1:
+            fee_text = fee_elements[1].text.strip()  # Витягуємо текст з другого div елемента
+            fee_parts = fee_text.split(' ')
+            if len(fee_parts) > 0:
+                fee_amount = fee_parts[0][:4]  # Отримуємо перші 4 цифри з суми комісії
+            else:
+                fee_amount = "0"  # Якщо не вдалося отримати текст, повертаємо "0" (або інше значення за замовчуванням)
+        print(fee_amount)
+    except Exception as e:
+        print(e)
+    finally:
+        driver.quit()
 
     # Update the Price field of the admin user
     collection.update_one(
