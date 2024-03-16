@@ -43,20 +43,21 @@ async def parse(bot: Bot):
     time.sleep(10)
 
     try:
-        # Замість implicitly_wait можемо використати WebDriverWait для більшої точності
-        paragraph = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "p.chakra-text.css-1gdcvrl"))
-        )
-        full_text = paragraph.text.strip()
-        parts = full_text.split('.')
-
-        # Забезпечуємо, що залишаємо лише чотири цифри після крапки, як в вашому оргінальному коді
-        if len(parts) > 1:
-            text = f'{parts[0]}.{parts[1][:4]}'
+    driver.implicitly_wait(10)  # Чекаємо, коли елементи з'являться на сторінці
+    # Шукаємо другий div елемент з класом 'chakra-skeleton css-mkh3pz', що містить Fee MNT
+    fee_elements = driver.find_elements(By.CSS_SELECTOR, ".css-5ujltp .chakra-skeleton.css-mkh3pz")
+    if len(fee_elements) > 1:
+        fee_text = fee_elements[1].text.strip()  # Витягуємо текст з другого div елемента
+        fee_parts = fee_text.split(' ')
+        if len(fee_parts) > 0:
+            fee_amount = fee_parts[0][:4]  # Отримуємо перші 4 цифри з суми комісії
         else:
-            text = parts[0]
-    finally:
-        driver.quit()
+            fee_amount = "0"  # Якщо не вдалося отримати текст, повертаємо "0" (або інше значення за замовчуванням)
+    print(fee_amount)
+except Exception as e:
+    print(e)
+finally:
+    driver.quit()
 
     # Update the Price field of the admin user
     collection.update_one(
